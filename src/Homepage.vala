@@ -59,6 +59,27 @@ namespace AppCenter {
             }
             banner_box.add (newest_banner);
 
+            var recent_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            var recent_label = new Gtk.Label ("Recent");
+            recent_label.get_style_context ().add_class ("h4");
+            recent_label.xalign = 0;
+
+            var recent_more_button_label = new Gtk.Label (_("<small>More</small>"));
+            recent_more_button_label.use_markup = true;
+            var recent_more_button = new Gtk.Button ();
+            recent_more_button.add (recent_more_button_label);
+            recent_more_button.halign = Gtk.Align.END;
+            recent_more_button.valign = Gtk.Align.CENTER;
+            recent_box.add (recent_label);
+            recent_box.add (recent_more_button);
+            recent_box.homogeneous = true;
+            recent_box.margin_left = 24;
+            recent_box.margin_right = 24;
+
+            var recent_carousel = new Widgets.AppCarousel ();
+            recent_carousel.margin_left = 12;
+            recent_carousel.margin_right = 12;
+
             var categories_label = new Gtk.Label ("Categories");
             categories_label.get_style_context ().add_class ("h4");
             categories_label.xalign = 0;
@@ -67,11 +88,23 @@ namespace AppCenter {
             category_view = new Views.CategoryView ();
 
             scrolled_box.add (banner_box);
+            scrolled_box.add (recent_box);
+            scrolled_box.add (recent_carousel);
             scrolled_box.add (categories_label);
             scrolled_box.add (category_view.category_flow);
 
             scrolled_window.add (scrolled_box);
             this.add (scrolled_window);
+
+            update_latest_row ();
+        }
+
+        public async void update_latest_row () {
+            var client = AppCenterCore.Client.get_default ();
+            var latest_packages = yield client.get_latest_packages ();
+            foreach (var pk_package in latest_packages) {
+                stdout.printf ("LATEST: %s\n", pk_package.get_name ());
+            }
         }
     }
 }

@@ -485,13 +485,31 @@ public class AppCenterCore.Client : Object {
             results.get_package_array ().foreach ((pk_package) => {
                 installed.add (pk_package);
             });
-
         } catch (Error e) {
             critical (e.message);
         }
 
         task_count--;
         return installed;
+    }
+
+    public async Gee.TreeSet<Pk.Package> get_latest_packages () {
+        task_count++;
+
+        Pk.Bitfield filter = Pk.Bitfield.from_enums (Pk.Filter.NOT_INSTALLED, Pk.Filter.GUI);
+        var latest = new Gee.TreeSet<Pk.Package> ();
+
+        try {
+            Pk.Results results = yield client.get_packages_async (filter, null, (prog, type) => {});
+            results.get_package_array ().foreach ((pk_package) => {
+                latest.add (pk_package);
+            });
+        } catch (Error e) {
+            critical (e.message);
+        }
+
+        task_count--;
+        return latest;
     }
 
     public AppCenterCore.Package? get_package_for_id (string id) {
